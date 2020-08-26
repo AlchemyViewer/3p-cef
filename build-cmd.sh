@@ -33,7 +33,7 @@ cef_stage_dir="${stage}/cef"
 # https://bitbucket.org/chromiumembedded/cef/wiki/BranchesAndBuilding.md#markdown-header-release-branches
 # as can this one: https://www.chromium.org/developers/calendar
 # E.G. Branch 4044 represents Chromium/CEF 81.x
-cef_branch_number=4044
+cef_branch_number=4147
 
 # The commit hash in the branch we want to
 # check out from. One way to determine the hash to use is to look at the commits
@@ -41,7 +41,7 @@ cef_branch_number=4044
 # https://bitbucket.org/chromiumembedded/cef/commits/branch/3987 and pick the
 # commit hash the looks sensible - often something like "bumped CEF/Chromium
 # to version x.xx.xx"
-cef_commit_hash=b223419
+cef_commit_hash=fdc7504
 
 # Turn on the proprietary codec support (the main reason for building from source vs using
 # the Spotify open source builds here http://opensource.spotify.com/cefbuilds/index.html)
@@ -181,6 +181,7 @@ case "$AUTOBUILD_PLATFORM" in
             --branch="$cef_branch_number" \
             --checkout="$cef_commit_hash" \
             --client-distrib \
+            --force-clean \
             --x64-build \
             --distrib-subdir="$cef_distrib_subdir"
 
@@ -205,10 +206,86 @@ case "$AUTOBUILD_PLATFORM" in
             -I "$cef_stage_dir/" \
             -o "$stage/version" \
             "$top/version.cpp"
-        "$stage/version" > "$stage/version.txt"
+        "$stage/version" > "$stage/VERSION.txt"
     ;;
 
-    linux*)
-        echo "This project is not currently supported for $AUTOBUILD_PLATFORM" 1>&2 ; exit 1
+    linux64)
+        # the directory where CEF is built. The documentation suggests that on
+        # Windows at least, this shouldn't be in a subdirectory since the
+        # complex build process generates enormous path names. This means we
+        # have a different location per build platform type
+        cef_build_dir="${stage}/cef_build"
+
+        # base directory structure
+        mkdir -p "$cef_build_dir/code"
+        mkdir -p "$cef_build_dir/code/automate"
+        mkdir -p "$cef_build_dir/code/chromium_git"
+
+        # Clone the Git repo with the Chromium/CEF build tools
+        cd "$cef_build_dir/code"
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+
+        # Grab the main build script (-k or --insecure to bypass curl failing on team city host)
+        # Note: using curl here to grab the file directly fails in TeamCity so we must use git
+        tmp_cef=tmp_cef_git
+        git clone --depth 1 https://bitbucket.org/chromiumembedded/cef "$tmp_cef"
+        cp "$tmp_cef/tools/automate/automate-git.py" "$cef_build_dir/code/automate/automate-git.py"
+        rm -rf "$tmp_cef"
+
+        # PATH needs to include the depot tools folder we cloned
+        export PATH=$cef_build_dir/code/depot_tools:$PATH
+
+        # Generally want media codecs enabled but switch them off above if that's not the case
+        # Note: we use quotation marks around the GN_DEFINES variable otherwise the build scripts
+        # ignore anything after the first space - maybe a bash limitation?
+        if [ $use_proprietary_codecs = "1" ]; then
+            export GN_DEFINES="is_official_build=true use_sysroot=true use_allocator=none symbol_level=1 is_cfi=false use_thin_lto=false proprietary_codecs=true ffmpeg_branding=Chrome"
+        else
+            export GN_DEFINES="is_official_build=true use_sysroot=true use_allocator=none symbol_level=1 is_cfi=false use_thin_lto=false"
+        fi
+
+        # create .tar.bz2 format package archives
+        export CEF_ARCHIVE_FORMAT=tar.bz2
+
+        # the location of the distributable files is based on the long, complex CEF/Chromium
+        # version numbers and that makes it difficult to deduce and find so we invoke the
+        # automate-git.py option to set the sub-dir ourselves
+        cef_distrib_subdir="cef_binary_linux64"
+
+        # The main build script that does everything and based on command line parameter
+        # (--client-distrib) also generates the distributable packages just like we used
+        # to take from Spotify. Note too that unlike the Windows version, we always invoke
+        # the 64bit command line parameter. Moreover, note that we never invoke the option
+        # to turn off debug builds since doing so produces a build result that is not
+        # compatible with autobuild and packages that consume it downstream.
+        cd "$cef_build_dir/code/chromium_git"
+        python3 ../automate/automate-git.py \
+            --download-dir="$cef_build_dir/code/chromium_git" \
+            --depot-tools-dir="$cef_build_dir/code/depot_tools" \
+            --branch="$cef_branch_number" \
+            --checkout="$cef_commit_hash" \
+            --client-distrib \
+            --force-clean \
+            --x64-build \
+            --build-target=cefsimple \
+            --distrib-subdir="$cef_distrib_subdir"
+
+        # copy over the bits of the build we need to package
+        cp -a "$cef_build_dir/code/chromium_git/chromium/src/cef/binary_distrib/$cef_distrib_subdir/" "$cef_stage_dir/"
+
+        # return to the directory above where we built CEF
+        cd "${cef_stage_dir}"
+
+        # licence file
+        mkdir -p "${stage}/LICENSES"
+        cp "${cef_stage_dir}/LICENSE.txt" "$stage/LICENSES/cef.txt"
+
+        # write version using original CEF package includes
+        g++ \
+            -I "$cef_stage_dir/include" \
+            -I "$cef_stage_dir/" \
+            -o "$stage/version" \
+            "$top/version.cpp"
+        "$stage/version" > "$stage/VERSION.txt"
     ;;
 esac
