@@ -94,7 +94,7 @@
 @if errorlevel = 1 (
     @curl.exe -O https://storage.googleapis.com/chrome-infra/depot_tools.zip
 ) else (
-    @powershell.exe -NoP -NonI -Command "curl.exe -O https://storage.googleapis.com/chrome-infra/depot_tools.zip"
+    @pwsh.exe -NoP -NonI -Command "curl.exe -O https://storage.googleapis.com/chrome-infra/depot_tools.zip"
 
 )
 
@@ -105,7 +105,7 @@
 @if errorlevel = 1 (
     @unzip depot_tools.zip -d depot_tools 
 ) else (
-    @powershell.exe -NoP -NonI -Command "Expand-Archive 'depot_tools.zip' '.\depot_tools\'"
+    @pwsh.exe -NoP -NonI -Command "Expand-Archive -Force 'depot_tools.zip' '.\depot_tools\'"
 )
 
 @rem Rudimentary timing
@@ -124,19 +124,19 @@
 
 @rem grab latest version of the main python script
 @cd %ROOT_CODE_DIRECTORY%\automate
-@powershell.exe -NoP -NonI -Command "curl.exe -O https://bitbucket.org/chromiumembedded/cef/raw/master/tools/automate/automate-git.py"
+@pwsh.exe -NoP -NonI -Command "curl.exe -O https://bitbucket.org/chromiumembedded/cef/raw/master/tools/automate/automate-git.py"
 
 @rem Starting point for automate-git.py step
 @cd %ROOT_CODE_DIRECTORY%\chromium_git
 
 @rem Settings taking from the Chromium/CEF Master Build Page.
-@set GN_ARGUMENTS=--ide=vs2017 --sln=cef --filters=//cef/*
+@set GN_ARGUMENTS=--ide=vs2019 --sln=cef --filters=//cef/*
 
 @rem Not everyone wants the official media codec support
 @set GN_DEFINES=is_official_build=true
 @if "%PROPRIETARY_CODEC%"=="1" (set GN_DEFINES=is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome)
 
-set GYP_MSVS_VERSION=2017
+set GYP_MSVS_VERSION=2019
 
 @rem specifiy that the final build result is a .tar.bz2 archive vs zip
 @set CEF_ARCHIVE_FORMAT=tar.bz2
@@ -173,7 +173,7 @@ set GYP_MSVS_VERSION=2017
 @rem list some other commands [ninja...] but those are only required if
 @rem you are editing source and don't want to make a full build each time
 cd %ROOT_CODE_DIRECTORY%\chromium_git\chromium\src\cef
-@python ..\automate\automate-git.py^
+@python %ROOT_CODE_DIRECTORY%\automate\automate-git.py^
  --download-dir=%ROOT_CODE_DIRECTORY%\chromium_git^
  --depot-tools-dir=%ROOT_CODE_DIRECTORY%\depot_tools^
  --branch=%BRANCH%^
