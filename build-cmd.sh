@@ -150,9 +150,9 @@ case "$AUTOBUILD_PLATFORM" in
         # Note: we use quotation marks around the GN_DEFINES variable otherwise the build scripts
         # ignore anything after the first space - maybe a bash limitation?
         if [ $use_proprietary_codecs = "1" ]; then
-            export GN_DEFINES="is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome use_thin_lto=false"
+            export GN_DEFINES="is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome"
         else
-            export GN_DEFINES="is_official_build=true use_thin_lto=false"
+            export GN_DEFINES="is_official_build=true"
         fi
 
         # create .tar.bz2 format package archives
@@ -234,9 +234,9 @@ case "$AUTOBUILD_PLATFORM" in
         # Note: we use quotation marks around the GN_DEFINES variable otherwise the build scripts
         # ignore anything after the first space - maybe a bash limitation?
         if [ $use_proprietary_codecs = "1" ]; then
-            export GN_DEFINES="is_official_build=true use_sysroot=true use_allocator=none symbol_level=1 is_cfi=false use_thin_lto=false proprietary_codecs=true ffmpeg_branding=Chrome use_thin_lto=false"
+            export GN_DEFINES="is_official_build=true use_sysroot=true use_allocator=none symbol_level=1 is_cfi=false use_thin_lto=false proprietary_codecs=true ffmpeg_branding=Chrome"
         else
-            export GN_DEFINES="is_official_build=true use_sysroot=true use_allocator=none symbol_level=1 is_cfi=false use_thin_lto=false use_thin_lto=false"
+            export GN_DEFINES="is_official_build=true use_sysroot=true use_allocator=none symbol_level=1 is_cfi=false use_thin_lto=false"
         fi
 
         # create .tar.bz2 format package archives
