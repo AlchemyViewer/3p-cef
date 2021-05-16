@@ -133,8 +133,8 @@
 @set GN_ARGUMENTS=--ide=vs2019 --sln=cef --filters=//cef/*
 
 @rem Not everyone wants the official media codec support
-@set GN_DEFINES=is_official_build=true
-@if "%PROPRIETARY_CODEC%"=="1" (set GN_DEFINES=is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome)
+@set GN_DEFINES=is_official_build=true use_thin_lto=false
+@if "%PROPRIETARY_CODEC%"=="1" (set GN_DEFINES=is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome use_thin_lto=false)
 
 set GYP_MSVS_VERSION=2019
 

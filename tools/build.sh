@@ -75,9 +75,9 @@ export PATH=$cef_build_dir/code/depot_tools:$PATH
 # Note: we use quotation marks around the GN_DEFINES variable otherwise the build scripts
 # ignore anything after the first space - maybe a bash limitation?
 if [ $use_proprietary_codecs = "1" ]; then
-export GN_DEFINES="is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome"
+export GN_DEFINES="is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome use_thin_lto=false"
 else
-export GN_DEFINES="is_official_build=true"
+export GN_DEFINES="is_official_build=true use_thin_lto=false"
 fi
 
 # Builds take forever and when developing, not building Debug can save more than 50%
