@@ -186,11 +186,6 @@ case "$AUTOBUILD_PLATFORM" in
         # return to the directory above where we built CEF
         cd "${cef_stage_dir}"
 
-        # Remove files from the raw CEF build that we do not use
-        rm -rf "tests"
-        rm "Debug/cef_sandbox.a"
-        rm "Release/cef_sandbox.a"
-
         # licence file
         mkdir -p "${stage}/LICENSES"
         cp "${cef_stage_dir}/LICENSE.txt" "$stage/LICENSES/cef.txt"
