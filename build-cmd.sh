@@ -161,7 +161,7 @@ case "$AUTOBUILD_PLATFORM" in
         # the location of the distributable files is based on the long, complex CEF/Chromium
         # version numbers and that makes it difficult to deduce and find so we invoke the
         # automate-git.py option to set the sub-dir ourselves
-        cef_distrib_subdir="cef_binary_macosx"
+        cef_distrib_subdir_x64="cef_binary_macosx_x64"
 
         # The main build script that does everything and based on command line parameter
         # (--client-distrib) also generates the distributable packages just like we used
@@ -178,10 +178,29 @@ case "$AUTOBUILD_PLATFORM" in
             --client-distrib \
             --force-clean \
             --x64-build \
-            --distrib-subdir="$cef_distrib_subdir"
+            --distrib-subdir="$cef_distrib_subdir_x64"
 
         # copy over the bits of the build we need to package
-        cp -R "$cef_build_dir/code/chromium_git/chromium/src/cef/binary_distrib/$cef_distrib_subdir/" "$cef_stage_dir/"
+        mkdir -p "$cef_stage_dir/x86_64/"
+        cp -R "$cef_build_dir/code/chromium_git/chromium/src/cef/binary_distrib/$cef_distrib_subdir_x64/*" "$cef_stage_dir/x86_64/"
+
+        # and now we do it all again, but for AARCH64
+        export CEF_ENABLE_ARM64=1
+        cef_distrib_subdir_arm64="cef_binary_macosx_arm64"
+
+        python ../automate/automate-git.py \
+            --download-dir="$cef_build_dir/code/chromium_git" \
+            --depot-tools-dir="$cef_build_dir/code/depot_tools" \
+            --branch="$cef_branch_number" \
+            --checkout="$cef_commit_hash" \
+            --client-distrib \
+            --force-clean \
+            --arm64-build \
+            --distrib-subdir="$cef_distrib_subdir_arm64"
+
+        # copy over the bits of the build we need to package
+        mkdir -p "$cef_stage_dir/arm64/"
+        cp -R "$cef_build_dir/code/chromium_git/chromium/src/cef/binary_distrib/$cef_distrib_subdir_arm64/*" "$cef_stage_dir/arm64/"
 
         # return to the directory above where we built CEF
         cd "${cef_stage_dir}"
