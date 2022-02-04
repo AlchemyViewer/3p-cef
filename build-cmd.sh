@@ -3,7 +3,7 @@
 cd "$(dirname "$0")"
 
 # turn on verbose debugging output for parabuild logs.
-exec 4>&1; export BASH_XTRACEFD=4; set -x
+# exec 4>&1; export BASH_XTRACEFD=4; set -x
 
 # make errors fatal
 set -e
@@ -33,7 +33,7 @@ cef_stage_dir="${stage}/cef"
 # https://bitbucket.org/chromiumembedded/cef/wiki/BranchesAndBuilding.md#markdown-header-release-branches
 # as can this one: https://www.chromium.org/developers/calendar
 # E.G. Branch 4389 represents Chromium/CEF 89.x
-cef_branch_number=4692
+cef_branch_number=4758
 
 # The commit hash in the branch we want to
 # check out from. One way to determine the hash to use is to look at the commits
@@ -41,7 +41,7 @@ cef_branch_number=4692
 # https://bitbucket.org/chromiumembedded/cef/commits/branch/4389 and pick the
 # commit hash the looks sensible - often something like "bumped CEF/Chromium
 # to version x.xx.xx"
-cef_commit_hash=2b00258
+cef_commit_hash=42d1b7e
 
 # Turn on the proprietary codec support (the main reason for building from source vs using
 # the Spotify open source builds here http://opensource.spotify.com/cefbuilds/index.html)
@@ -134,6 +134,7 @@ case "$AUTOBUILD_PLATFORM" in
 
         # Clone the Git repo with the Chromium/CEF build tools
         cd "$cef_build_dir/code"
+        rm -rf depot_tools
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
         # Grab the main build script (-k or --insecure to bypass curl failing on team city host)
@@ -161,7 +162,7 @@ case "$AUTOBUILD_PLATFORM" in
         # the location of the distributable files is based on the long, complex CEF/Chromium
         # version numbers and that makes it difficult to deduce and find so we invoke the
         # automate-git.py option to set the sub-dir ourselves
-        cef_distrib_subdir="cef_binary_macosx"
+        cef_distrib_subdir_x64="cef_binary_macosx_x64"
 
         # The main build script that does everything and based on command line parameter
         # (--client-distrib) also generates the distributable packages just like we used
@@ -170,6 +171,7 @@ case "$AUTOBUILD_PLATFORM" in
         # to turn off debug builds since doing so produces a build result that is not
         # compatible with autobuild and packages that consume it downstream.
         cd "$cef_build_dir/code/chromium_git"
+        export CEF_ENABLE_AMD64=1
         python ../automate/automate-git.py \
             --download-dir="$cef_build_dir/code/chromium_git" \
             --depot-tools-dir="$cef_build_dir/code/depot_tools" \
@@ -178,10 +180,29 @@ case "$AUTOBUILD_PLATFORM" in
             --client-distrib \
             --force-clean \
             --x64-build \
-            --distrib-subdir="$cef_distrib_subdir"
+            --distrib-subdir="$cef_distrib_subdir_x64"
 
         # copy over the bits of the build we need to package
-        cp -R "$cef_build_dir/code/chromium_git/chromium/src/cef/binary_distrib/$cef_distrib_subdir/" "$cef_stage_dir/"
+        mkdir -p "$cef_stage_dir/x86_64/"
+        cp -R "$cef_build_dir/code/chromium_git/chromium/src/cef/binary_distrib/$cef_distrib_subdir_x64/"* "$cef_stage_dir/x86_64/"
+
+        # and now we do it all again, but for AARCH64
+        export CEF_ENABLE_ARM64=1
+        cef_distrib_subdir_arm64="cef_binary_macosx_arm64"
+
+        python ../automate/automate-git.py \
+            --download-dir="$cef_build_dir/code/chromium_git" \
+            --depot-tools-dir="$cef_build_dir/code/depot_tools" \
+            --branch="$cef_branch_number" \
+            --checkout="$cef_commit_hash" \
+            --client-distrib \
+            --force-clean \
+            --arm64-build \
+            --distrib-subdir="$cef_distrib_subdir_arm64"
+
+        # copy over the bits of the build we need to package
+        mkdir -p "$cef_stage_dir/arm64/"
+        cp -R "$cef_build_dir/code/chromium_git/chromium/src/cef/binary_distrib/$cef_distrib_subdir_arm64/"* "$cef_stage_dir/arm64/"
 
         # return to the directory above where we built CEF
         cd "${cef_stage_dir}"
