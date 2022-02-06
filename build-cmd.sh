@@ -209,10 +209,11 @@ case "$AUTOBUILD_PLATFORM" in
 
         # licence file
         mkdir -p "${stage}/LICENSES"
-        cp "${cef_stage_dir}/arm64/LICENSE.txt" "$stage/LICENSES/cef.txt"
+        cp "${cef_stage_dir}/x86_64/LICENSE.txt" "$stage/LICENSES/cef.txt"
 
         # write version using original CEF package includes
         clang \
+            -I "$cef_stage_dir/x86_64/include/" \
             -I "$cef_stage_dir/include" \
             -I "$cef_stage_dir/" \
             -o "$stage/version" \
