@@ -28,8 +28,8 @@
 @set DEFAULT_ROOT_CODE_DIRECTORY=\code
 @set DEFAULT_BIT_WIDTH=64
 @set DEFAULT_PROPRIETARY_CODEC=1
-@set DEFAULT_BRANCH=4951
-@set DEFAULT_CEF_COMMIT_HASH="ca159c5"
+@set DEFAULT_BRANCH=5304
+@set DEFAULT_CEF_COMMIT_HASH="eb36a79"
 @set DEFAULT_CEF_DISTRIB_SUBDIR="cef"
 
 @rem This "special" variable expands to the drive letter and path of the batch file it
@@ -133,8 +133,8 @@
 @set GN_ARGUMENTS=--ide=vs2019 --sln=cef --filters=//cef/*
 
 @rem Not everyone wants the official media codec support
-@set GN_DEFINES=is_official_build=true use_thin_lto=false
-@if "%PROPRIETARY_CODEC%"=="1" (set GN_DEFINES=is_official_build=true use_thin_lto=false proprietary_codecs=true ffmpeg_branding=Chrome)
+@set GN_DEFINES=is_official_build=true
+@if "%PROPRIETARY_CODEC%"=="1" (set GN_DEFINES=is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome)
 
 set GYP_MSVS_VERSION=2019
 
@@ -180,6 +180,7 @@ cd %ROOT_CODE_DIRECTORY%\chromium_git\chromium\src\cef
  --client-distrib^
  --distrib-subdir=%CEF_DISTRIB_SUBDIR%^
  --force-clean^
+ --with-pgo-profiles^
  %BUILD_64BIT_FLAGS%
 
 @rem Rudimentary timing

@@ -75,9 +75,9 @@ export PATH=$cef_build_dir/code/depot_tools:$PATH
 # Note: we use quotation marks around the GN_DEFINES variable otherwise the build scripts
 # ignore anything after the first space - maybe a bash limitation?
 if [ $use_proprietary_codecs = "1" ]; then
-export GN_DEFINES="is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome use_thin_lto=false"
+export GN_DEFINES="is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome"
 else
-export GN_DEFINES="is_official_build=true use_thin_lto=false"
+export GN_DEFINES="is_official_build=true"
 fi
 
 # Builds take forever and when developing, not building Debug can save more than 50%
@@ -108,6 +108,7 @@ python ../automate/automate-git.py \
     --checkout="$cef_commit_hash" \
     --client-distrib \
     --x64-build \
+    --with-pgo-profiles \
     --distrib-subdir="$cef_distrib_subdir" \
     "$debug_build_flag"
 
