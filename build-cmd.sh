@@ -237,6 +237,7 @@ case "$AUTOBUILD_PLATFORM" in
 
         # Clone the Git repo with the Chromium/CEF build tools
         cd "$cef_build_dir/code"
+        rm -rf depot_tools
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
         # Grab the main build script (-k or --insecure to bypass curl failing on team city host)
@@ -279,6 +280,7 @@ case "$AUTOBUILD_PLATFORM" in
             --branch="$cef_branch_number" \
             --checkout="$cef_commit_hash" \
             --client-distrib \
+            --build-target=cefsimple \
             --force-clean \
             --x64-build \
             --with-pgo-profiles \
