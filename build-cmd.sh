@@ -33,7 +33,7 @@ cef_stage_dir="${stage}/cef"
 # https://bitbucket.org/chromiumembedded/cef/wiki/BranchesAndBuilding.md#markdown-header-release-branches
 # as can this one: https://www.chromium.org/developers/calendar
 # E.G. Branch 4389 represents Chromium/CEF 89.x
-cef_branch_number=5304
+cef_branch_number=5615
 
 # The commit hash in the branch we want to
 # check out from. One way to determine the hash to use is to look at the commits
@@ -41,7 +41,7 @@ cef_branch_number=5304
 # https://bitbucket.org/chromiumembedded/cef/commits/branch/4389 and pick the
 # commit hash the looks sensible - often something like "bumped CEF/Chromium
 # to version x.xx.xx"
-cef_commit_hash=8a0d72d
+cef_commit_hash=b09c4ca
 
 # Turn on the proprietary codec support (the main reason for building from source vs using
 # the Spotify open source builds here http://opensource.spotify.com/cefbuilds/index.html)
@@ -254,9 +254,9 @@ case "$AUTOBUILD_PLATFORM" in
         # Note: we use quotation marks around the GN_DEFINES variable otherwise the build scripts
         # ignore anything after the first space - maybe a bash limitation?
         if [ $use_proprietary_codecs = "1" ]; then
-            export GN_DEFINES="is_official_build=true use_sysroot=true use_allocator=none symbol_level=1 is_cfi=false proprietary_codecs=true ffmpeg_branding=Chrome"
+            export GN_DEFINES="is_official_build=true use_sysroot=true symbol_level=1 is_cfi=false proprietary_codecs=true ffmpeg_branding=Chrome"
         else
-            export GN_DEFINES="is_official_build=true use_sysroot=true use_allocator=none symbol_level=1 is_cfi=false"
+            export GN_DEFINES="is_official_build=true use_sysroot=true symbol_level=1 is_cfi=false"
         fi
 
         # create .tar.bz2 format package archives
