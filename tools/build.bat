@@ -28,8 +28,8 @@
 @set DEFAULT_ROOT_CODE_DIRECTORY=\code
 @set DEFAULT_BIT_WIDTH=64
 @set DEFAULT_PROPRIETARY_CODEC=1
-@set DEFAULT_BRANCH=5672
-@set DEFAULT_CEF_COMMIT_HASH="525fa10"
+@set DEFAULT_BRANCH=5790
+@set DEFAULT_CEF_COMMIT_HASH="749b4d4"
 @set DEFAULT_CEF_DISTRIB_SUBDIR="cef"
 
 @rem This "special" variable expands to the drive letter and path of the batch file it
